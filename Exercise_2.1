@@ -1,0 +1,20 @@
+Exercise 2.1
+Rewrite the following code snippet, removing the withColumnRenamed method. Which version is clearer and easier to read?
+
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, length
+
+# The `length` function returns the number of characters in a string column.
+
+spark = SparkSession.builder.getOrCreate()
+ex21 = (
+    spark.read.text("./data/Ch02/1342-0.txt")
+    .select(length(col("value")))
+    .withColumnRenamed("length(value)", "number_of_char")
+)
+
+Solution:-
+
+ex21 = (
+	spark.read.text("1342-0.txt").select(length(col("value")).alias("number_of_char"))
+)
