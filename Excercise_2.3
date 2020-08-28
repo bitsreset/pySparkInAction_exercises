@@ -1,0 +1,31 @@
+Let’s take our words_nonull data frame, available in listing 2.18. You can use the code in the repository 
+(code/Ch02/end_of_chapter.py) into your REPL to get the data frame loaded.
+
+a) Remove all of the occurrences of the word "is"
+
+b) (Challenge) Using the length function explained in exercise 2.1, keep only the words with more than 3 characters.
+
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, split, explode, lower, regexp_extract
+
+spark = SparkSession.builder.getOrCreate()
+book = spark.read.text("1342-0.txt")
+lines = book.select(split(book.value, " ").alias("line"))
+words = lines.select(explode(col("line")).alias("word"))
+words_lower = words.select(lower(col("word")).alias("word_lower"))
+
+words_clean = words_lower.select(
+    regexp_extract(col("word_lower"), "[a-z]*", 0).alias("word")
+)
+
+words_nonull = words_clean.where(col("word") != "")
+words_nonull.show()
+
+#a) Remove all of the occurrences of the word "is"
+words_nois = words_nonull.where(col("word") != "is" )
+words_nois.show()
+
+#b) (Challenge) Using the length function explained in exercise 2.1, 
+#keep only the words with more than 3 characters.
+words_gt3_chars =  words_nonull.where( length(col("word")) > 3 )
+words_gt3_chars.show()
