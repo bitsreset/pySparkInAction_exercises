@@ -1,0 +1,24 @@
+One of your friends come to you with the following code.
+They have no idea why it doesn’t work. Can you diagnose the problem,
+explain why it is an error and provide a fix?
+
+from pyspark.sql.functions import col, split
+
+book = spark.read.text("1342-0.txt")
+
+book = book.printSchema()
+
+lines = book.select(split(book.value, " ").alias("line"))
+
+words = lines.select(explode(col("line")).alias("word"))
+
+Fixed Code: to import 'explode' from pyspark.sql.functions
+
+from pyspark.sql.functions import col, split, explode
+book = spark.read.text("1342-0.txt")
+
+book = book.printSchema()
+
+lines = book.select(split(book.value, " ").alias("line"))
+
+words = lines.select(explode(col("line")).alias("word"))
