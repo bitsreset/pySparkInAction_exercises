@@ -1,0 +1,27 @@
+The where clause takes a Boolean expression over one or many column to filter the data frame.
+Beyond the usual Boolean operators (>, <, ==, ⇐, >=, !=), PySpark provides other functions returning Boolean
+ columns in the pyspark.sql.functions module.
+
+A good example is the isin() function, which takes a list of values as a parameter, and will return only the records 
+where the value in the column equals a member of the list.
+
+Let’s say you want to remove the words is, not, the and if from your list of words, using a single where() method 
+on the words_nonull data frame (see exercise 2.3). Write the code to do so.
+
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, split, explode, lower, regexp_extract
+
+spark = SparkSession.builder.getOrCreate()
+book = spark.read.text("1342-0.txt")
+lines = book.select(split(book.value, " ").alias("line"))
+words = lines.select(explode(col("line")).alias("word"))
+words_lower = words.select(lower(col("word")).alias("word_lower"))
+
+words_clean = words_lower.select(
+    regexp_extract(col("word_lower"), "[a-z]*", 0).alias("word")
+)
+
+words_nonull = words_clean.where(col("word") != "")
+
+words_using_isin = words_nonull.where( col("word").isin(['is','not','the','if']) == False )
+words_using_isin.show()
